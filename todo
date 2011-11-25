@@ -1,0 +1,10 @@
+- first thing is to get all the parts working locally (api calling over sockets not exposed to the internet), along with the roughest possible web front end.
+  - make sure to write a manifest of how you setup the venv 
+  - should be possible to init a new VM instance with a few commands
+
+- then we get a cheap SSL key
+- then we bang on the UI for signing up and authentication
+- improve the browsing UI
+- implement the commenting UI
+- implement relationships and sharing
+- recruit some beta testers
