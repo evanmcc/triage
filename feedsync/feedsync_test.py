@@ -7,15 +7,23 @@ from os import urandom
 
 con = Connection()
 
-
 class api_test(test_case):
     
     def setUp(self): 
         #nuke test db & recreate
         con.drop_database(con.test)
         users = con.test.users
+        feeds = con.test.feeds
+        comments = con.test.comments
+        assertions = con.test.assertions
+
         #poke it into the module 
         feedsync.users = users
+        feedsync.feeds = feeds
+        feedsync.comments = comments
+        feedsync.assertions = assertions
+
+        feedsync.app.debug = True
         self.app = feedsync.app.test_client()
         users.insert({'username':'evan', 'password':'evanpass', 'feeds':[]})
         feedsync.app.secret_key = urandom(24)
@@ -80,15 +88,45 @@ class api_test(test_case):
         assert response.status == '200 OK'
         assert response.data == '[]'
 
-        data = { 'title' : 'fooblog',
-                 'alias' : 'fb',
-                 'xml_url' : 'http://example.com/rss/',
-                 'http_url' : 'http://example.com/',
-                 'feed_type' : 'rss' }
-
-        response = self.app.post('/feeds/evan/', data= data)
-        assert response.status == '201 CREATED'
+        data1 = { 'title' : 'fooblog',
+                  'alias' : 'fb',
+                  'xml_url' : 'http://example.com/rss/',
+                  'http_url' : 'http://example.com/',
+                  'feed_type' : 'rss' }
         
+        data2 = {'alias':"Jacob Kaplan-Moss - Writing",
+                 'title':"Jacob Kaplan-Moss - Writing",
+                 'feed_type':"rss",
+                 'xml_url':"http://jacobian.org/feed/",
+                 'html_url':"http://www.jacobian.org/writing/"}
+
+        response = self.app.delete('/feeds/evan/1')
+        assert response.status == '404 NOT FOUND'
+
+        response = self.app.post('/feeds/evan/', data= data1)
+        assert response.status == '201 CREATED'
+        assert response.data == '1'
+
+        response = self.app.post('/feeds/evan/', data = data2)
+        assert response.status == '201 CREATED'
+        assert response.data == '2'
+
+        response = self.app.get('/feeds/evan/')
+        assert response.status == '200 OK'
+        assert response.data == '[1, 2]'
+
+        response = self.app.delete('/feeds/evan/1')
+        assert response.status == '200 OK'
+
+        response = self.app.get('/feeds/evan/')
+        assert response.status == '200 OK'
+        assert response.data == '[2]'
+
+        response = self.app.delete('/feeds/evan/blar')
+        assert response.status == '404 NOT FOUND'
+
+        response = self.app.delete('/feeds/evan/22')
+        assert response.status == '404 NOT FOUND'
 
 
     def tearDown(self):

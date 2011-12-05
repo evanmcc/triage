@@ -17,6 +17,7 @@ posts = sync_db.posts
 # a note is a comment with public == False
 comments = sync_db.comments
 assertions = sync_db.assertions
+feeds = sync_db.feeds
 
 user_db = connection.users 
 users = user_db.users
@@ -25,14 +26,50 @@ users = user_db.users
 def api_index():
     return 'API VERSION: %s \nAPI doc goes here' % API_VERSION
 
+# feed utility functions
+def add_feed_to_master_list(feed):
+    candidates = [ x for x in feeds.find({'xml_url':feed['xml_url']})]
+    if len(candidates) == 0:
+        #add a new thing
+        feed['subscribers'] = 1
+        feed['new'] = True
+        gfid = feeds.insert(feed)
+    elif len(candidates) == 1:
+        gfid = candidates[0]['id']
+        #increment 
+    else: 
+        abort(406) #need a better code here
+    return gfid 
+
+def add_feed_to_user(user, global_id):
+    uf = user.get('feeds')
+    if not uf:
+        user['feeds'] = []
+        user['next_id'] = 2
+        res = 1
+    else:
+        res = user['next_id']
+        user['next_id'] += 1
+
+    user['feeds'].append({'feed_id':res, 'global_id':global_id})
+    users.save(user)
+       
+    return res
+
+
 # add/delete feed subscription
-@app.route('/feeds/<username>/')
+@app.route('/feeds/<username>/', methods = ['GET', 'POST'])
 @app.route('/feeds/<username>/<int:feed_id>', 
-           methods = ['GET', 'POST', 'DELETE'])
+           methods = ['GET', 'DELETE'])
 def feed(username, feed_id = None): 
     """Feed support several methods:
      - GET: returns whether or not the user named is 
        subscribed to the feed"""
+    # at this point you need to be authenticated for anything you do
+    user = users.find_one({'username':username})
+    if session.get('username') != username or not user:
+        abort(401)
+
     if request.method == 'POST':
         # got a new feed to add, validate
         title = request.form.get('title')
@@ -43,46 +80,68 @@ def feed(username, feed_id = None):
         
         if not xml_url:
             abort(400)
-        # if it doesn't exist in the global list, add it
-        poss_matches = feeds.find({'xml_url':xml_url})
         
-        if not poss_matches:
-            # it's OK that some of these are None or blank, feedparser 
-            # will fix it up for us in the background.
-            new_feed = {'title':title, 'alias':alias, 'xml_url':xml_url, 
-                        'http_url':http_url, 'feed_type':feed_type}
-            new_feed_id = feeds.insert(new_feed)
-            
-        else:
-            if len(poss_mathches) == 1:
-                pass
-            else:
-                #can we try to resolve here?
-                abort(404) #need to explain this in the docs
+        # it's OK that some of these are None or blank, feedparser 
+        # will fix it up for us in the background.
+        new_feed = {'title':title, 'alias':alias, 'xml_url':xml_url, 
+                    'http_url':http_url, 'feed_type':feed_type}
+
+        global_feed_id = add_feed_to_master_list(new_feed)
+        if not global_feed_id:
+            abort(500) #need to explain this in the docs
+        user_feed_id = add_feed_to_user(user, global_feed_id)
+
         # return the resource
-        response = make_reponse('%s' % feed_id )
-    elif request.method == 'PUT':
-        pass
+        return '%s' % user_feed_id, 201
     elif request.method == 'DELETE':
-        pass
+        if not feed_id:
+            abort(400)
+        uf = user.get('feeds')
+        if not uf: 
+            abort(404)
+        removed = False
+        for i, feed in enumerate(uf):
+            if feed['feed_id'] == int(feed_id):
+                del uf[i]
+                removed = True
+        if not removed: 
+            abort(404)
+        users.save(user)
     # otherwise we're in GET
-    # eventually should add public/private feeds here
-
-    if session.get('username') == username: 
-        #you're you, so you can see your feeds
-        if not feed_id: 
-            #we just want a list
-            user = users.find_one({'username':username})
-            if not user:
-                abort(401)
-
-            return dumps(user['feeds'])
+    if not feed_id: 
+        #we just want a list
+        return dumps([ x['feed_id'] for x in user['feeds'] ])
     else:
-        abort(401)
-    return 'foo'
-
+        return '' #dumps(user[feeds
 
 # mark/unmark post as read
+@app.route('/posts/<username>/<int:feed_id>', methods = ['GET'])
+@app.route('/posts/<username>/<int:feed_id>/<int:post_id>', methods = ['GET', 'PUT'])
+def posts(username, feed_id, post_id):
+
+    user = users.find_one({'username':username})
+    if session.get('username') != username or not user:
+        abort(401)
+
+    if request.method == GET:
+        uf = user.get('feeds')
+        if not uf:
+            abort(404)
+        global_feed = None
+        for feed in uf:
+            if feed_id == feed['feed_id']:
+                global_feed = feed['glbal_id']
+                break
+        if not global_id:
+            abort(404)
+        if post_id:
+            reutrn post info
+        else:
+            return a list of post
+        
+
+    return ''
+
 
 # mark all feed posts as read
 
