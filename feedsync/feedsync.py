@@ -1,25 +1,37 @@
 
 from flask import Flask, request, session, url_for, redirect, abort, g, \
     make_response
+
+
+# just putting this here so I can close some tabs
+#from flaskext.bcrypt import bcrypt_init, generate_password_hash, check_password_hash
+
+#bcrypt_init(app)
+
+#pw_hash = generate_password_hash('secret')
+#check_password_hash(pw_hash, 'secret')
+
+
 from pymongo import Connection
 from json import dumps
 
+from itsdangerous import URLSafeTimedSerializer as url_serializer
 
 API_VERSION = 1
 
 app = Flask(__name__)
 app.config.from_object(__name__)
 
-connection = Connection()
+g.connection = Connection()
 
-sync_db = connection.sync_db 
+sync_db = g.connection.sync_db 
 posts = sync_db.posts
 # a note is a comment with public == False
 comments = sync_db.comments
 assertions = sync_db.assertions
 feeds = sync_db.feeds
 
-user_db = connection.users 
+user_db = g.connection.users 
 users = user_db.users
 
 @app.route('/')
