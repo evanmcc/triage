@@ -1,0 +1,15 @@
+Flask==0.8
+Flask-Bcrypt==0.4
+Flask-OpenID==1.0.1
+Jinja2==2.6
+Werkzeug==0.8.1
+distribute==0.6.10
+feedparser==5.0.1
+gevent==0.13.6
+greenlet==0.3.1
+itsdangerous==0.11
+openid-mongodb==0.1
+py-bcrypt==0.2
+pymongo==2.0.1
+python-openid==2.2.5
+wsgiref==0.1.2
