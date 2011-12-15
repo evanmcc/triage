@@ -22,16 +22,16 @@ API_VERSION = 1
 app = Flask(__name__)
 app.config.from_object(__name__)
 
-g.connection = Connection()
+connection = Connection()
 
-sync_db = g.connection.sync_db 
+sync_db = connection.sync_db 
 posts = sync_db.posts
 # a note is a comment with public == False
 comments = sync_db.comments
 assertions = sync_db.assertions
 feeds = sync_db.feeds
 
-user_db = g.connection.users 
+user_db = connection.users 
 users = user_db.users
 
 @app.route('/')
@@ -146,10 +146,10 @@ def posts(username, feed_id, post_id):
                 break
         if not global_id:
             abort(404)
-        if post_id:
-            reutrn post info
-        else:
-            return a list of post
+        #if post_id:
+         #   reutrn post info
+        #else:
+         #   return a list of post
         
 
     return ''
