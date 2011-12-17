@@ -11,19 +11,13 @@ class api_test(test_case):
     
     def setUp(self): 
         #nuke test db & recreate
-        con.drop_database(con.test)
         users = con.test.users
         feeds = con.test.feeds
         comments = con.test.comments
         assertions = con.test.assertions
 
-        #poke it into the module 
-        feedsync.users = users
-        feedsync.feeds = feeds
-        feedsync.comments = comments
-        feedsync.assertions = assertions
-
         feedsync.app.debug = True
+        feedsync.app.testing = True
         self.app = feedsync.app.test_client()
         users.insert({'username':'evan', 'password':'evanpass', 'feeds':[]})
         feedsync.app.secret_key = urandom(24)
