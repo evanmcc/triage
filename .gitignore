@@ -2,6 +2,7 @@ crap/
 bin/
 lib/
 include/
+local
 *~
 #*#
 *.pyc
