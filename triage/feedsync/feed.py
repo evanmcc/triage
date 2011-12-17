@@ -2,6 +2,8 @@
 from feedsync import app, request, session, abort, \
     url_for, redirect, make_response, users, feeds, dumps
 
+from flask.views import MethodView
+
 # feed utility functions
 def add_feed_to_master_list(feed):
     candidates = [ x for x in feeds.find({'xml_url':feed['xml_url']})]
@@ -32,21 +34,23 @@ def add_feed_to_user(user, global_id):
        
     return res
 
+class feed(MethodView):
+    def user_validate(self, username): 
+        user = users.find_one({'username':username})
+        if session.get('username') != username or not user:
+            abort(401)
+        return user
 
-# add/delete feed subscription
-@app.route('/feeds/<username>/', methods = ['GET', 'POST'])
-@app.route('/feeds/<username>/<int:feed_id>', 
-           methods = ['GET', 'DELETE'])
-def feed(username, feed_id = None): 
-    """Feed support several methods:
-     - GET: returns whether or not the user named is 
-       subscribed to the feed"""
-    # at this point you need to be authenticated for anything you do
-    user = users.find_one({'username':username})
-    if session.get('username') != username or not user:
-        abort(401)
+    def get(self, username, feed_id = None):
+        user = self.user_validate(username)
+        if not feed_id: 
+        #we just want a list
+            return dumps([ x['feed_id'] for x in user['feeds'] ])
+        else:
+            return '' #dumps(user[feeds        pass
 
-    if request.method == 'POST':
+    def post(self, username, feed_id = None):  
+        user = self.user_validate(username)
         # got a new feed to add, validate
         title = request.form.get('title')
         alias = request.form.get('alias')
@@ -69,7 +73,9 @@ def feed(username, feed_id = None):
 
         # return the resource
         return '%s' % user_feed_id, 201
-    elif request.method == 'DELETE':
+
+    def delete(self, username, feed_id = None): 
+        user = self.user_validate(username)
         if not feed_id:
             abort(400)
         uf = user.get('feeds')
@@ -83,10 +89,7 @@ def feed(username, feed_id = None):
         if not removed: 
             abort(404)
         users.save(user)
-    # otherwise we're in GET
-    if not feed_id: 
-        #we just want a list
-        return dumps([ x['feed_id'] for x in user['feeds'] ])
-    else:
-        return '' #dumps(user[feeds
+        return ''
 
+app.add_url_rule('/feeds/<username>/', view_func=feed.as_view('feed'))
+app.add_url_rule('/feeds/<username>/<int:feed_id>', view_func=feed.as_view('feed_w_id'))
