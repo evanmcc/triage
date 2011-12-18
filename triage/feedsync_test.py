@@ -25,7 +25,7 @@ class api_test(test_case):
     def login(self):
         self.app.post('/login', 
                       data = {'user':'evan', 
-                              'pass':'evanpass'})
+                              'pass':'$2a$12$ZydwZ2QJshRvOCSog5kQfu1rtPWXMWTlAtzHzmMvc9QdQDsLoST2G'})
     def logout(self):
         self.app.get('/logout')
 
