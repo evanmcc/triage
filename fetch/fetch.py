@@ -95,6 +95,8 @@ class feed_getter(greenlet):
         self.watchers = []
 
     def register(self):
+        # if the server goes away or loses our registration,
+        # we should try again
         ret =  rest_call(self.server_addr, 'register/', 'POST',
                          self.serializer,
                          { 'name':self.name, 
@@ -104,7 +106,6 @@ class feed_getter(greenlet):
         if ret != 200, 'OK':
             #check for name conflict and reregister if need be
             exit(2)
-
 
     def _run(self):
         self.register()
@@ -125,7 +126,7 @@ def rest_call(host, path, method, serializer, values = None):
     con = http_connection(server_addr)
 
     cryptkey = serializer.dumps(urandom(8))
-    con.request(method, '/fetch/feed/' + '?key=' + cryptkey, values)
+    con.request(method, '/fetch/' + path + '?key=' + cryptkey, values)
 
     response = con.getresponse()
 
