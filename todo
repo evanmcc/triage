@@ -1,21 +1,29 @@
-- first thing is to get all the parts working locally (api calling over sockets not exposed to the internet), along with the roughest possible web front end.
-  - make sure to write a manifest of how you setup the venv 
-  - write shell script to do apt & venv on new ubuntu image
+site:
+ - finish test harness
+ - rework authentication to not suck so horribly
+ - need to be able to change passwords & personal details
+ - improve the browsing UI
+ - implement the commenting UI
+ - implement relationships and sharing
+ - then we bang on the UI for signing up and authentication
 
-- finish API 
-- finish test harness
-- rework authentication to not suck so horribly
-- need to be able to change passwords & personal details
+fetch: 
+ - rebalance feeds somehow.
+ - feed check is heartbeat
+ - dead/stuck fetcher detection
 
-- figure out how to backup a mongodb instance.
-- figure out how to mirror a mongodb instance.
+API:
+ 
+ - finish API 
 
-- then we get a cheap SSL key
-- then we bang on the UI for signing up and authentication
-- improve the browsing UI
-- implement the commenting UI
-- implement relationships and sharing
-- recruit some beta testers
+meta:
+ - make sure to write a manifest of how you setup the venv 
+ - write shell script to do apt & venv on new ubuntu image
+ - figure out how to backup a mongodb instance.
+ - figure out how to mirror a mongodb instance.
+
+ - then we get a cheap SSL key
+ - recruit some beta testers
 
 done:
 + order local server
