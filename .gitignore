@@ -4,6 +4,6 @@ lib/
 include/
 local
 *~
-#*#
+*#*#
 *.pyc
 *.pyo

@@ -8,4 +8,5 @@ app.config.from_object(__name__)
 
 
 from .view import splash
-from .ajax import news_item, login_chuck, user_status
+from .ajax import news_item, login_chunk, user_status
+

@@ -1,3 +1,9 @@
+rework everything http to use requests.
+
+remember that envoy is there for subprocess stuff.
+
+
+
 site:
  - finish test harness
  - rework authentication to not suck so horribly
@@ -11,6 +17,7 @@ fetch:
  - rebalance feeds somehow.
  - feed check is heartbeat
  - dead/stuck fetcher detection
+
 
 API:
  
