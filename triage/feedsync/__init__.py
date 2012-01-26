@@ -27,8 +27,8 @@ testing = False
 connection = Connection()
 if testing:
     sync_db = connection.sync_db 
-    posts = sync_db.posts
 
+    posts = sync_db.posts
     comments = sync_db.comments
     assertions = sync_db.assertions
     feeds = sync_db.feeds
@@ -44,6 +44,7 @@ else:
     users = connection.test.users
 
 from .feed import feed
+from .fetch import fetch_feed, fetch_register
 
 @app.route('/')
 def api_index():

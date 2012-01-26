@@ -4,15 +4,20 @@ from feedsync import app, g, request, session, abort, \
 
 from flask.views import MethodView
 
-from itsdangerous import URLSafeTimedSerializer as url_serializer 
+from itsdangerous import URLSafeTimedSerializer as url_serializer, \
+    BadSignature
 
 # feed utility functions
-serializer = url_serializer(app.secret_key)
+serializer = url_serializer("234jn13lk1jb4tgk4jg4kljgbq;lfasdFADFASDGj3rb3")
+fetchers = {}
+
+
 def signed_request(signstring): 
+    print signstring
     try: 
-        if len(aserializer.loads(signstring)) == 8:
-            return True
-    except Exception, e: 
+        ret = serializer.loads(signstring, max_age=1.5)
+        return ret
+    except BadSignature, e: 
         app.logger.warning('someone tried to pass us a bogus request: %s' % e)
         # need more info there
         return False
@@ -20,12 +25,14 @@ def signed_request(signstring):
 
 def register(name, pid, hostname): 
     # make sure we're not already registered.
-    if g.fetchers.get(name): 
+    if fetchers.get(name): 
         abort(403) #maybe different code?
-    print hostname, request.remote_addr, request.remote_host
+
+    print hostname, request.remote_addr#, request.remote_host
+
     if request.remote_host != hostname: 
         abort(403) 
-    g.fetchers['name'] = {'pid':pid, 'hostname':hostname}
+    fetchers['name'] = {'pid':pid, 'hostname':hostname}
     return True
 
 def registered():
@@ -34,7 +41,7 @@ def registered():
     host = request.form.get('host')
     if not name or not pid or not host:
         return False
-    reg = g.fetchers.get(name): 
+    reg = fetchers.get(name)
     if not reg:
         return False
     if request.remote_host != host: 
@@ -43,7 +50,7 @@ def registered():
 
 class fetch_register(MethodView):
     def get(self):
-        if signed_request(request.args.get('key')) && \
+        if signed_request(request.args.get('key')) and \
                 registered():
             return ''
         else: 
@@ -61,7 +68,7 @@ class fetch_register(MethodView):
 
         abort(403)
 
-app.add_url_rule('/fetch/register/', view_func=fetch_reg.as_view('fetch_reg'))
+app.add_url_rule('/fetch/register/', view_func=fetch_register.as_view('fetch_register'))
 
 class fetch_feed(MethodView):
     def get(self):
@@ -75,3 +82,4 @@ class fetch_feed(MethodView):
         
         
 app.add_url_rule('/fetch/feed/', view_func=fetch_feed.as_view('fetch_feed'))
+
