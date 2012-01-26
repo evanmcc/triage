@@ -1,8 +1,21 @@
-rework everything http to use requests.
 
 remember that envoy is there for subprocess stuff.
 
-
+restart steps: 
+ - get the master API server running with some RSS feeds to test with
+   - make sure that logging is happening in the right place.
+   - server should query the DB on startup as to what feeds it knows about
+   - should add everything via API calls.
+ - get the fetcher working for those RSS feeds
+ - make sure that we can run multiple instances of the fetcher
+ - work out all of the DB storage format wrinkles that are sure to come up
+ - work on post history and pre-digestion code
+ - get login working at reasonably secure
+   - generate a local SSL cert to test with before I buy one.
+ - get non-ajax UI working
+ - start making thing ajaxy
+ - start asking around for testers
+ - friend/comment/follow UI stuff
 
 site:
  - finish test harness
@@ -35,3 +48,4 @@ meta:
 done:
 + order local server
 + should be possible to init a new VM instance with a few commands
++ rework everything http to use requests
