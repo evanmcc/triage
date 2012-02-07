@@ -1,0 +1,29 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html lang="en">
+<head>
+  <title> FT RDR </title>
+  <link rel="stylesheet" type="text/css" href="static/reset.css" />
+  <link rel="stylesheet" type="text/css" href="static/rdr.css" />
+  
+</head>
+<body>
+
+<div id='top'>
+  <span id='main_icon'> MAIN ICON HERE </span>
+  <span id='meta'> 
+    <a href='{{url_for('manage')}}'> manage feeds </a> |
+    <a href='{{url_for('settings')}}'> other settings </a> |
+    <a href='{{url_for('logout')}}'> log out </a> 
+  </span>
+  
+</div>
+<div id='nav'></div>
+<div id='content'>
+  <span id='empty_string'> YOU ARE OUT OF THINGS TO READ. <BR>
+    GO OUTSIDE.
+  </span>
+</div>
+<div id='discussion'></div>
+
+</body>
+</html>
